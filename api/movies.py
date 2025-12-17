@@ -88,6 +88,9 @@ def clean_records(df: pd.DataFrame) -> list[dict]:
     data = data.where(pd.notna(data), None)
     for col in data.columns:
         data[col] = data[col].apply(lambda v: None if v == "" else v)
+    for col in ["tahun", "judul", "url", "genre", "quality", "durasi", "negara", "sutradara", "cast", "sinopsis", "poster_url", "release_date", "hydrax_servers", "turbovip_servers", "p2p_servers", "cast_servers", "other_servers", "slug"]:
+        if col in data.columns:
+            data[col] = data[col].apply(lambda v: str(v) if v is not None else None)
     return data.to_dict(orient="records")
 
 
