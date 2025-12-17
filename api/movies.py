@@ -16,6 +16,19 @@ def load_df() -> pd.DataFrame:
     return pd.read_csv(CSV_PATH)
 
 
+NUMERIC_FIELDS = [
+    "rating",
+    "votes",
+    "jumlah_cast",
+    "hydrax_count",
+    "turbovip_count",
+    "p2p_count",
+    "cast_count",
+    "other_count",
+    "total_servers",
+]
+
+
 class Movie(BaseModel):
     slug: str
     judul: Optional[str] = None
@@ -67,6 +80,17 @@ def filtered(df: pd.DataFrame, q: Optional[str], min_rating: Optional[float]) ->
     return data
 
 
+def clean_records(df: pd.DataFrame) -> list[dict]:
+    data = df.copy()
+    for col in NUMERIC_FIELDS:
+        if col in data.columns:
+            data[col] = pd.to_numeric(data[col], errors="coerce")
+    data = data.where(pd.notna(data), None)
+    for col in data.columns:
+        data[col] = data[col].apply(lambda v: None if v == "" else v)
+    return data.to_dict(orient="records")
+
+
 @app.get("/api/movies", response_model=List[Movie])
 def list_movies(
     q: Optional[str] = Query(None, description="Cari judul/slug/genre"),
@@ -77,7 +101,7 @@ def list_movies(
     df = load_df()
     data = filtered(df, q, min_rating)
     sliced = data.iloc[offset: offset + limit]
-    return sliced.fillna("").to_dict(orient="records")
+    return clean_records(sliced)
 
 
 @app.get("/api/movies/{slug}", response_model=Movie)
@@ -86,5 +110,5 @@ def get_movie(slug: str):
     row = df[df["slug"] == slug]
     if row.empty:
         raise HTTPException(status_code=404, detail="Movie not found")
-    return row.iloc[0].fillna("").to_dict()
+    return clean_records(row)[0]
 
