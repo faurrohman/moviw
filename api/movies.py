@@ -8,12 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 ROOT = os.path.dirname(__file__)
-CSV_PATH = os.path.join(ROOT, "..", "movie_details_FINAL.csv")
+JSON_PATH = os.path.join(ROOT, "..", "movie_details_FINAL.json")
 
 
 @lru_cache(maxsize=1)
 def load_df() -> pd.DataFrame:
-    return pd.read_csv(CSV_PATH)
+    return pd.read_json(JSON_PATH)
 
 
 NUMERIC_FIELDS = [
