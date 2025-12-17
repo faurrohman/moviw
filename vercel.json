@@ -5,5 +5,9 @@
       "runtime": "@vercel/python@4.7.0",
       "includeFiles": "movie_details_FINAL.json"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api" },
+    { "source": "/favicon.ico", "destination": "/api/favicon" }
+  ]
 }
