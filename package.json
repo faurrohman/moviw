@@ -1,0 +1,19 @@
+{
+  "name": "movie-api",
+  "version": "1.0.0",
+  "description": "API untuk data movie menggunakan Vercel dengan integrasi TMDB",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node api/index.js"
+  },
+  "keywords": ["api", "movie", "vercel", "tmdb"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": "18.x"
+  }
+}
+

@@ -1,13 +1,8 @@
 {
-  "version": 2,
   "functions": {
-    "api/*.py": {
-      "runtime": "@vercel/python@4.7.0",
-      "includeFiles": "movie_details_FINAL.json"
+    "api/**/*.js": {
+      "maxDuration": 30
     }
-  },
-  "rewrites": [
-    { "source": "/", "destination": "/api" },
-    { "source": "/favicon.ico", "destination": "/api/favicon" }
-  ]
+  }
 }
+
