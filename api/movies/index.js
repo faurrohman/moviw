@@ -1,4 +1,4 @@
-const moviesData = require('../../data/movie_details_FINAL.json');
+const { getMoviesData } = require('../../utils/data-loader');
 const { enrichMovies } = require('../../utils/tmdb');
 
 module.exports = async (req, res) => {
@@ -9,6 +9,19 @@ module.exports = async (req, res) => {
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // Load movies data with error handling
+  let moviesData;
+  try {
+    moviesData = getMoviesData();
+  } catch (error) {
+    console.error('Error loading movies data:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to load movies data',
+      error: error.message
+    });
   }
 
   const { query } = req;
