@@ -4,9 +4,6 @@
       "maxDuration": 30,
       "memory": 3008
     }
-  },
-  "includeFiles": [
-    "data/**"
-  ]
+  }
 }
 

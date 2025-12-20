@@ -1,0 +1,1706 @@
+<style>
+    /* Reset dan isolasi widget */
+    .netflix-widget-full {
+        all: initial;
+        display: block;
+    }
+    
+    .netflix-widget-full * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    /* Widget melebar penuh dengan z-index rendah */
+    .netflix-widget-full {
+        background: #141414;
+        color: #fff;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 40px 0;
+        overflow-x: hidden;
+        z-index: 1;
+    }
+    
+    .nf-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 40px;
+        position: relative;
+        z-index: 1;
+    }
+    .btndownload{
+        color: red;
+    }
+    /* Search Wrapper */
+    .nf-search-wrapper {
+        position: relative;
+        max-width: 400px;
+        margin: 0 auto 25px;
+    }
+    
+    .nf-search-box {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .nf-search-box input {
+        padding: 14px 22px;
+        border-radius: 6px;
+        border: 2px solid #333;
+        background: rgba(30,30,30,0.8);
+        color: #fff;
+        outline: none;
+        width: 100%;
+        font-size: 15px;
+        transition: all 0.3s;
+    }
+    
+    .nf-search-box input::placeholder {
+        color: #999;
+    }
+    
+    .nf-search-box input:focus {
+        background: rgba(30,30,30,0.95);
+        border-color: #e50914;
+        box-shadow: 0 0 10px rgba(229,9,20,0.3);
+    }
+    
+    .nf-search-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(20,20,20,0.98);
+        border: 1px solid #333;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+        display: none;
+    }
+    
+    .nf-search-dropdown.active {
+        display: block;
+    }
+    
+    .nf-search-item {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .nf-search-item:hover {
+        background: rgba(229,9,20,0.2);
+    }
+    
+    .nf-search-item-poster {
+        width: 50px;
+        height: 75px;
+        object-fit: cover;
+        border-radius: 4px;
+        background: #2a2a2a;
+    }
+    
+    .nf-search-item-info {
+        flex: 1;
+    }
+    
+    .nf-search-item-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    .nf-search-item-meta {
+        font-size: 13px;
+        color: #999;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .nf-search-item-rating {
+        color: #46d369;
+    }
+    
+    /* Genre Filter */
+    .nf-genre-filter {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        overflow-x: auto;
+        padding: 10px 5px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .nf-genre-filter::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .nf-genre-filter::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 3px;
+    }
+    
+    .nf-genre-filter::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 3px;
+    }
+    
+    .nf-genre-btn {
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.3s;
+    }
+    
+    .nf-genre-btn:hover, .nf-genre-btn.active {
+        background: #e50914;
+        border-color: #e50914;
+        transform: scale(1.05);
+    }
+    
+    /* Trending Tabs */
+    .nf-trending-tabs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .nf-tab-btn {
+        padding: 10px 24px;
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .nf-tab-btn:hover, .nf-tab-btn.active {
+        background: #e50914;
+        border-color: #e50914;
+    }
+    
+    /* Watchlist Badge */
+    .nf-watchlist-badge {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #e50914;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(229,9,20,0.5);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+    }
+    
+    .nf-watchlist-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 16px rgba(229,9,20,0.7);
+    }
+    
+    .nf-watchlist-count {
+        background: #fff;
+        color: #e50914;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    
+    /* Hero Banner */
+    .nf-hero {
+        position: relative;
+        height: 500px;
+        margin-bottom: 40px;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        z-index: 1;
+    }
+    
+    .nf-hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 50%, transparent 100%),
+                    linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%);
+        z-index: 1;
+    }
+    
+    .nf-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 600px;
+        padding: 0 30px;
+    }
+    
+    .nf-hero-title {
+        font-size: 52px;
+        font-weight: 700;
+        margin-bottom: 18px;
+        text-shadow: 3px 3px 10px rgba(0,0,0,0.9);
+        line-height: 1.1;
+    }
+    
+    .nf-hero-meta {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 18px;
+        font-size: 17px;
+        align-items: center;
+    }
+    
+    .nf-rating {
+        color: #46d369;
+        font-weight: 700;
+        font-size: 18px;
+    }
+    
+    .nf-hero-desc {
+        font-size: 17px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        opacity: 0.95;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .nf-hero-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .nf-btn {
+        padding: 14px 35px;
+        border: none;
+        border-radius: 5px;
+        font-size: 17px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .nf-btn-play {
+        background: #fff;
+        color: #000;
+    }
+    
+    .nf-btn-play:hover {
+        background: rgba(255,255,255,0.85);
+        transform: scale(1.05);
+    }
+    
+    .nf-btn-info {
+        background: rgba(109,109,110,0.7);
+        color: #fff;
+        backdrop-filter: blur(10px);
+    }
+    
+    .nf-btn-info:hover {
+        background: rgba(109,109,110,0.9);
+        transform: scale(1.05);
+    }
+    
+    /* Section */
+    .nf-section {
+        margin-bottom: 55px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .nf-section-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-left: 5px;
+        letter-spacing: -0.5px;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .nf-section-title::after {
+        content: '';
+        position: absolute;
+        left: 5px;
+        bottom: -6px;
+        width: 70px;
+        height: 3px;
+        background: linear-gradient(90deg, #e50914, #ff9800);
+        border-radius: 4px;
+        box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
+    }
+    
+    /* Movie Row */
+    .nf-row {
+        display: flex;
+        gap: 18px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 20px 5px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .nf-row::-webkit-scrollbar {
+        height: 12px;
+    }
+    
+    .nf-row::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 6px;
+        margin: 0 10px;
+    }
+    
+    .nf-row::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 6px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+    
+    .nf-row::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.3);
+        background-clip: padding-box;
+    }
+    
+    /* Movie Card */
+    .nf-card {
+        min-width: 260px;
+        max-width: 260px;
+        background: #1f1f1f;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .nf-card:hover {
+        transform: translateY(-8px) scale(1.03);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.6);
+        z-index: 5;
+    }
+    
+    .nf-poster {
+        width: 100%;
+        height: 390px;
+        object-fit: cover;
+        display: block;
+        background: #2a2a2a;
+    }
+    
+    .nf-card-info {
+        padding: 16px;
+    }
+    
+    .nf-card-title {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 44px;
+    }
+    
+    .nf-card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        opacity: 0.8;
+        margin-bottom: 12px;
+    }
+    
+    .nf-card-rating {
+        color: #46d369;
+        font-weight: 700;
+    }
+    
+    .nf-card-desc {
+        font-size: 13px;
+        opacity: 0.75;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 14px;
+        min-height: 60px;
+    }
+    
+    .nf-card-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .nf-watch-btn, .nf-bookmark-btn {
+        flex: 1;
+        padding: 11px;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 14px;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .nf-watch-btn {
+        background: #e50914;
+        color: #fff;
+    }
+    
+    .nf-watch-btn:hover {
+        background: #f40612;
+        transform: scale(1.02);
+    }
+    
+    .nf-bookmark-btn {
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        flex: 0 0 45px;
+    }
+    
+    .nf-bookmark-btn:hover {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .nf-bookmark-btn.bookmarked {
+        background: #46d369;
+    }
+    
+    /* Modal */
+    .nf-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 10000;
+        overflow-y: auto;
+        padding: 40px 20px;
+    }
+    
+    .nf-modal.active {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    
+    .nf-modal-content {
+        background: #181818;
+        border-radius: 12px;
+        max-width: 900px;
+        width: 100%;
+        position: relative;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+    }
+    
+    .nf-modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+    
+    .nf-modal-close:hover {
+        background: #e50914;
+        transform: scale(1.1);
+    }
+    
+    .nf-modal-hero {
+        position: relative;
+        height: 500px;
+        background-size: cover;
+        background-position: center;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .nf-modal-hero-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, #181818 0%, transparent 100%);
+        padding: 40px 30px 30px;
+    }
+    
+    .nf-modal-title {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .nf-modal-meta {
+        display: flex;
+        gap: 20px;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .nf-modal-body {
+        padding: 30px;
+    }
+    
+    .nf-modal-section {
+        margin-bottom: 30px;
+    }
+    
+    .nf-modal-section-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #e50914;
+    }
+    
+    .nf-modal-overview {
+        line-height: 1.6;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+    
+    .nf-modal-trailer {
+        width: 100%;
+        aspect-ratio: 16/9;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    /* Movie Player */
+    .nf-modal-player-section {
+        margin-bottom: 30px;
+    }
+    
+    .nf-modal-player-wrapper {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+    
+    .nf-modal-player {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 8px;
+        display: none;
+    }
+    
+    .nf-modal-player.loaded {
+        display: block;
+    }
+    
+    .nf-player-servers {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+    
+    .nf-player-server-btn {
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .nf-player-server-btn:hover {
+        background: rgba(255,255,255,0.2);
+        transform: scale(1.05);
+    }
+    
+    .nf-player-server-btn.active {
+        background: #e50914;
+        border-color: #e50914;
+    }
+    
+    .nf-player-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: #999;
+        font-size: 16px;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .nf-cast-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+    }
+    
+    .nf-cast-item {
+        text-align: center;
+    }
+    
+    .nf-cast-photo {
+        width: 100%;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #2a2a2a;
+        margin-bottom: 8px;
+    }
+    
+    .nf-cast-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    .nf-cast-character {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+    
+    .nf-similar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .nf-similar-item {
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+    
+    .nf-similar-item:hover {
+        transform: scale(1.05);
+    }
+    
+    .nf-similar-poster {
+        width: 100%;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #2a2a2a;
+        margin-bottom: 8px;
+    }
+    
+    .nf-similar-title {
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .nf-loading {
+        text-align: center;
+        padding: 60px 20px;
+        font-size: 16px;
+        opacity: 0.6;
+    }
+    
+    /* Ads Styling */
+    .nf-ads-container {
+        margin: 30px auto;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .nf-ads-banner-large {
+        max-width: 728px;
+        margin: 0 auto;
+        min-height: 90px;
+    }
+    
+    .nf-ads-banner-medium {
+        max-width: 468px;
+        margin: 0 auto;
+        min-height: 60px;
+    }
+    
+    .nf-ads-native {
+        margin: 20px auto;
+        max-width: 100%;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .nf-container {
+            padding: 0 20px;
+        }
+        
+        .nf-hero {
+            height: 380px;
+        }
+        
+        .nf-hero-title {
+            font-size: 36px;
+        }
+        
+        .nf-modal-title {
+            font-size: 28px;
+        }
+        
+        .nf-modal-hero {
+            height: 300px;
+        }
+        
+        .nf-search-wrapper {
+            max-width: 100%;
+        }
+        
+        .nf-watchlist-badge {
+            top: 10px;
+            right: 10px;
+            padding: 10px 16px;
+            font-size: 12px;
+        }
+        
+        .nf-ads-banner-large {
+            max-width: 100%;
+        }
+        
+        .nf-ads-banner-medium {
+            max-width: 100%;
+        }
+    }
+    </style>
+    
+    <div class="netflix-widget-full">
+        <!-- Watchlist Badge -->
+    
+    
+        <div class="nf-container">
+            <!-- Search Box -->
+            <div class="nf-search-wrapper">
+                <div class="nf-search-box">
+                    <input type="text" id="nfSearch" placeholder="🔍 Search movies or series..." />
+                </div>
+                <div class="nf-search-dropdown" id="nfSearchDropdown"></div>
+            </div>
+    
+            <!-- Genre Filter -->
+            <div class="nf-genre-filter" id="nfGenreFilter">
+                <button class="nf-genre-btn active" data-genre="">🔥 All</button>
+            </div>
+    
+            <!-- Hero Banner -->
+            <div class="nf-hero" id="nfHero">
+                <div class="nf-hero-overlay"></div>
+                <div class="nf-hero-content">
+                    <h1 class="nf-hero-title" id="nfHeroTitle">Loading...</h1>
+                    <div class="nf-hero-meta">
+                        <span class="nf-rating" id="nfHeroRating">⭐ -</span>
+                        <span id="nfHeroYear">-</span>
+                    </div>
+                    <p class="nf-hero-desc" id="nfHeroDesc">Loading movie description...</p>
+                    <div class="nf-hero-buttons">
+                        <button class="nf-btn nf-btn-play" id="nfHeroPlay">
+                            <span>▶</span> Watch Now
+                        </button>
+                        <button class="nf-btn nf-btn-info" id="nfHeroInfo">
+                            <span>ℹ</span> More Info
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADS POSISI 1: Setelah Hero Banner - Banner Besar 728x90 -->
+            <div class="nf-ads-container nf-ads-banner-large" id="ads-after-hero"></div>
+
+            <!-- Popular Movies -->
+            <div class="nf-section">
+                <h2 class="nf-section-title">🔥 Popular Movies</h2>
+                <div class="nf-row" id="nfPopular">
+                    <div class="nf-loading">Loading movies...</div>
+                </div>
+            </div>
+
+            <!-- ADS POSISI 2: Setelah Popular Movies - Native Banner -->
+            <div class="nf-ads-container nf-ads-native" id="ads-after-popular"></div>
+
+            <!-- Trending Now with Tabs -->
+            <div class="nf-section">
+                <h2 class="nf-section-title">📈 Trending</h2>
+                <div class="nf-trending-tabs">
+                    <button class="nf-tab-btn active" data-time="day">Today</button>
+                    <button class="nf-tab-btn" data-time="week">This Week</button>
+                </div>
+                <div class="nf-row" id="nfTrending">
+                    <div class="nf-loading">Loading movies...</div>
+                </div>
+            </div>
+
+            <!-- ADS POSISI 3: Setelah Trending - Banner Medium 468x60 -->
+            <div class="nf-ads-container nf-ads-banner-medium" id="ads-after-trending"></div>
+
+            <!-- Top Rated -->
+            <div class="nf-section">
+                <h2 class="nf-section-title">⭐ Top Rated</h2>
+                <div class="nf-row" id="nfTopRated">
+                    <div class="nf-loading">Loading movies...</div>
+                </div>
+            </div>
+    
+            <!-- Coming Soon -->
+            <div class="nf-section">
+                <h2 class="nf-section-title">🎬 Coming Soon</h2>
+                <div class="nf-row" id="nfUpcoming">
+                    <div class="nf-loading">Loading movies...</div>
+                </div>
+            </div>
+    
+            <!-- My Watchlist -->
+            <div class="nf-section" id="nfWatchlistSection" style="display: none;">
+                <h2 class="nf-section-title">📚 My Watchlist</h2>
+                <div class="nf-row" id="nfWatchlist"></div>
+            </div>
+        </div>
+    
+        <!-- Movie Detail Modal -->
+        <div class="nf-modal" id="nfModal">
+            <div class="nf-modal-content">
+                <button class="nf-modal-close" id="nfModalClose">×</button>
+                <div class="nf-modal-hero" id="nfModalHero">
+                    <div class="nf-modal-hero-overlay">
+                        <h2 class="nf-modal-title" id="nfModalTitle"></h2>
+                        <div class="nf-modal-meta" id="nfModalMeta"></div>
+                    </div>
+                </div>
+                <div class="nf-modal-body">
+                    <div class="nf-modal-section">
+                        <p class="nf-modal-overview" id="nfModalOverview"></p>
+                    </div>
+                    <div class="nf-modal-section" id="nfModalStreamsSection" style="display: none;">
+                        <h3 class="nf-modal-section-title">▶ Streaming Servers</h3>
+                        <div id="nfModalStreams" class="nf-modal-streams"></div>
+                    </div>
+                    <div class="nf-modal-section" id="nfModalPlayerSection" style="display: none;">
+                        <h3 class="nf-modal-section-title">🎥 Watch Movie</h3>
+                        <div class="nf-modal-player-wrapper">
+                            <iframe class="nf-modal-player" id="nfModalPlayer" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                            <div class="nf-player-placeholder" id="nfPlayerPlaceholder">Select a server to watch</div>
+                        </div>
+                        <div class="nf-player-servers" id="nfPlayerServers"></div>
+                    </div>
+                    <div class="nf-modal-section" id="nfModalTrailerSection" style="display: none;">
+                        <h3 class="nf-modal-section-title">🎬 Trailer</h3>
+                        <iframe class="nf-modal-trailer" id="nfModalTrailer" frameborder="0" allowfullscreen></iframe>
+                        <!-- ADS POSISI 4: Di Modal Setelah Trailer - Native Banner -->
+                        <div class="nf-ads-container nf-ads-native" id="ads-in-modal" style="margin-top: 20px;"></div>
+                        <h3 class="nf-modal-section-title">⬇️ Download Here</h3>
+                        <button class="nf-tab-btn cpa" >Mediafire</button>
+                        <button class="nf-tab-btn cpa" >SendCM</button>
+                        <button class="nf-tab-btn cpa">Pixrldrain</button>
+                        <button class="nf-tab-btn cpa">Up4Ever</button>
+                    </div>
+                    <div class="nf-modal-section">
+                        <h3 class="nf-modal-section-title">👥 Pemeran</h3>
+                        <div class="nf-cast-grid" id="nfModalCast"></div>
+                    </div>
+                    <div class="nf-modal-section">
+                        <h3 class="nf-modal-section-title">🎯 Film Serupa</h3>
+                        <div class="nf-similar-grid" id="nfModalSimilar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    (function() {
+        // ============================================
+        // KONFIGURASI IKLAN - MUDAH DIUBAH
+        // ============================================
+        // Cara menggunakan:
+        // 1. Ubah nilai enabled: true/false untuk mengaktifkan/menonaktifkan iklan
+        // 2. Ubah key/scriptUrl sesuai dengan kode iklan Anda
+        // 3. Atur penempatan dengan mengubah nilai true/false di bagian placement
+        // 4. Semua iklan akan otomatis dimuat berdasarkan konfigurasi ini
+        // ============================================
+        const AD_CONFIG = {
+            enabled: true, // Set false untuk menonaktifkan semua iklan
+            
+            // Banner Ad Besar (728x90) - Posisi: Setelah Hero Banner
+            bannerLarge: {
+                enabled: true,
+                key: '3d9e894a749050c90678252f930d96c1',
+                height: 90,
+                width: 728
+            },
+            
+            // Banner Ad Medium (468x60) - Posisi: Setelah Trending
+            bannerMedium: {
+                enabled: true,
+                key: '277f86e54dca8d48f3700715e13355c8',
+                height: 60,
+                width: 468
+            },
+            
+            // Native Banner - Posisi: Setelah Popular Movies & Di Modal
+            nativeBanner: {
+                enabled: true,
+                scriptUrl: '//pl28186596.effectivegatecpm.com/8f0c66a160dd5cac5b87864bffa5368b/invoke.js',
+                containerId: 'container-8f0c66a160dd5cac5b87864bffa5368b'
+            },
+            
+            // Popunder - Otomatis dimuat setelah delay
+            popunder: {
+                enabled: true,
+                scriptUrl: '//pl28186406.effectivegatecpm.com/7c/ec/dd/7cecdd232aa0a10fb2f867d363129232.js',
+                delay: 2000, // Delay awal sebelum popunder pertama
+                interval: 10000 // Interval popunder saat modal (watch) aktif
+            },
+            
+            // Smartlink - Untuk tombol download (Mediafire, SendCM, dll)
+            smartlink: {
+                enabled: true,
+                url: 'https://www.effectivegatecpm.com/vwtj7w95aw?key=4732a59f11c1e4006ea26fa9c08c4a7b',
+                openInNewTab: true // Buka di tab baru
+            },
+            
+            // Penempatan strategis - Atur true/false untuk mengaktifkan/menonaktifkan posisi
+            placement: {
+                afterHero: true,      // Iklan setelah hero banner (Banner Large)
+                afterPopular: true,   // Iklan setelah Popular Movies (Native Banner)
+                afterTrending: true,  // Iklan setelah Trending (Banner Medium)
+                inModal: true,        // Iklan di dalam modal setelah trailer (Native Banner)
+                betweenSections: false // Iklan di antara section (opsional, belum diimplementasi)
+            }
+        };
+        
+        const API_KEY = "132ee89aea0c5d4f2afb39f9947dd8fe";
+        const BASE_URL = "https://api.themoviedb.org/3";
+        const IMG_URL = "https://image.tmdb.org/t/p/w500";
+        const BACKDROP_URL = "https://image.tmdb.org/t/p/original";
+        // API CSV (ganti ke domain Vercel Anda)
+        const CSV_API_BASE = "https://moviw-1k25.vercel.app/api/movies";
+        const POSTER_FALLBACK = "https://via.placeholder.com/260x390/1f1f1f/666?text=No+Image";
+        
+        // English only
+        let currentLang = 'en-US';
+        let currentGenre = '';
+        let currentTrending = 'day';
+        let watchlist = JSON.parse(localStorage.getItem('nf-watchlist') || '[]');
+        let searchTimeout;
+    
+        // ============================================
+        // FUNGSI UNTUK RENDER IKLAN
+        // ============================================
+        function renderBannerAd(container, config) {
+            if (!AD_CONFIG.enabled || !config.enabled) return;
+            
+            var script1 = document.createElement('script');
+            script1.type = 'text/javascript';
+            script1.textContent = 'atOptions = {' +
+                'key: "' + config.key + '",' +
+                'format: "iframe",' +
+                'height: ' + config.height + ',' +
+                'width: ' + config.width + ',' +
+                'params: {}' +
+                '};';
+            container.appendChild(script1);
+            
+            var script2 = document.createElement('script');
+            script2.type = 'text/javascript';
+            script2.src = '//www.highperformanceformat.com/' + config.key + '/invoke.js';
+            container.appendChild(script2);
+        }
+        
+        function renderNativeBanner(container, config, customId) {
+            if (!AD_CONFIG.enabled || !config.enabled) return;
+            
+            var script = document.createElement('script');
+            script.async = true;
+            script.setAttribute('data-cfasync', 'false');
+            script.src = config.scriptUrl;
+            container.appendChild(script);
+            
+            var div = document.createElement('div');
+            div.id = customId || config.containerId;
+            container.appendChild(div);
+        }
+        
+        let popunderTimer = null;
+
+        function triggerPopunderOnce() {
+            if (!AD_CONFIG.enabled || !AD_CONFIG.popunder.enabled) return;
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = AD_CONFIG.popunder.scriptUrl;
+            document.body.appendChild(script);
+        }
+
+        function loadPopunder() {
+            if (!AD_CONFIG.enabled || !AD_CONFIG.popunder.enabled) return;
+            
+            setTimeout(triggerPopunderOnce, AD_CONFIG.popunder.delay);
+        }
+        
+        function getSmartlinkUrl(originalUrl) {
+            if (!AD_CONFIG.enabled || !AD_CONFIG.smartlink.enabled) {
+                return originalUrl;
+            }
+            return AD_CONFIG.smartlink.url;
+        }
+        
+        // Initialize
+        init();
+    
+        function init() {
+            loadGenres();
+            loadHero();
+            loadMovies('popular', 'nfPopular');
+            loadTrending('day');
+            loadMovies('top_rated', 'nfTopRated');
+            loadMovies('upcoming', 'nfUpcoming');
+            updateWatchlistBadge();
+            setupEventListeners();
+            
+            // Load popunder
+            loadPopunder();
+        }
+    
+        function setupEventListeners() {
+            // Search
+            const searchInput = document.getElementById('nfSearch');
+            const searchDropdown = document.getElementById('nfSearchDropdown');
+            
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                
+                if (query.length < 2) {
+                    searchDropdown.classList.remove('active');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    searchMovies(query);
+                }, 300);
+            });
+    
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim().length >= 2) {
+                    searchDropdown.classList.add('active');
+                }
+            });
+    
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                    searchDropdown.classList.remove('active');
+                }
+            });
+    
+            // Genre filter
+            document.getElementById('nfGenreFilter').addEventListener('click', function(e) {
+                if (e.target.classList.contains('nf-genre-btn')) {
+                    document.querySelectorAll('.nf-genre-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentGenre = e.target.dataset.genre;
+                    loadMoviesByGenre(currentGenre);
+                }
+            });
+    
+            // Trending tabs
+            document.querySelectorAll('.nf-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.nf-tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTrending = this.dataset.time;
+                    loadTrending(currentTrending);
+                }); 
+            });
+    
+            // Watchlist badge
+            
+            // Modal close
+            document.getElementById('nfModalClose').addEventListener('click', closeModal);
+            document.getElementById('nfModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        }
+    
+        // Load genres from TMDB
+        async function loadGenres() {
+            try {
+                const res = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}&language=${currentLang}`);
+                const data = await res.json();
+                const container = document.getElementById('nfGenreFilter');
+                
+                const genreButtons = data.genres.slice(0, 10).map(genre => 
+                    `<button class="nf-genre-btn" data-genre="${genre.id}">${genre.name}</button>`
+                ).join('');
+                
+                container.innerHTML = `<button class="nf-genre-btn active" data-genre="">🔥 All</button>` + genreButtons;
+            } catch (error) {
+                console.error('Error loading genres:', error);
+            }
+        }
+    
+        // Search movies with dropdown
+        async function searchMovies(query) {
+            try {
+                const res = await fetch(
+                    `${BASE_URL}/search/movie?api_key=${API_KEY}&language=${currentLang}&query=${encodeURIComponent(query)}`
+                );
+                const data = await res.json();
+                const dropdown = document.getElementById('nfSearchDropdown');
+                
+                if (data.results.length > 0) {
+                    dropdown.innerHTML = data.results.slice(0, 8).map(movie => {
+                        const year = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
+                        const poster = movie.poster_path ? `${IMG_URL}${movie.poster_path}` : 
+                            'https://via.placeholder.com/50x75/1f1f1f/666?text=?';
+                        const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
+                        
+                        return `
+                            <div class="nf-search-item" data-movie-id="${movie.id}">
+                                <img class="nf-search-item-poster" src="${poster}" alt="${movie.title}" loading="lazy">
+                                <div class="nf-search-item-info">
+                                    <div class="nf-search-item-title">${movie.title}</div>
+                                    <div class="nf-search-item-meta">
+                                        <span class="nf-search-item-rating">⭐ ${rating}</span>
+                                        <span>${year}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    dropdown.classList.add('active');
+                    
+                    // Add click listeners
+                    dropdown.querySelectorAll('.nf-search-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const movieId = this.dataset.movieId;
+                            openModal(movieId);
+                            dropdown.classList.remove('active');
+                            document.getElementById('nfSearch').value = '';
+                        });
+                    });
+                } else {
+                    dropdown.innerHTML = '<div class="nf-loading">No results found</div>';
+                    dropdown.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error searching:', error);
+            }
+        }
+    
+        // Load hero banner
+        async function loadHero() {
+            try {
+                const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${currentLang}`);
+                const data = await res.json();
+                const movie = data.results[0];
+    
+                document.getElementById('nfHero').style.backgroundImage = 
+                    `url('${BACKDROP_URL}${movie.backdrop_path}')`;
+                document.getElementById('nfHeroTitle').textContent = movie.title;
+                document.getElementById('nfHeroRating').innerHTML = `⭐ ${movie.vote_average.toFixed(1)}`;
+                document.getElementById('nfHeroYear').textContent = movie.release_date.split('-')[0];
+                document.getElementById('nfHeroDesc').textContent = 
+                    movie.overview || 'No description available.';
+                
+                document.getElementById('nfHeroPlay').onclick = () => openModal(movie.id);
+                document.getElementById('nfHeroInfo').onclick = () => openModal(movie.id);
+            } catch (error) {
+                console.error('Error loading hero:', error);
+            }
+        }
+    
+        // Create movie card
+        function createCard(movie) {
+            const year = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
+            const desc = movie.overview ? movie.overview.substring(0, 120) + '...' : 'No description available.';
+            const poster = movie.poster_path ? `${IMG_URL}${movie.poster_path}` : 
+                POSTER_FALLBACK;
+            const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
+            const isBookmarked = watchlist.some(m => m.id === movie.id);
+    
+            return `
+                <div class="nf-card">
+                    <img class="nf-poster" src="${poster}" alt="${movie.title}" loading="lazy" onclick="window.nfOpenModal(${movie.id})">
+                    <div class="nf-card-info">
+                        <div class="nf-card-title">${movie.title}</div>
+                        <div class="nf-card-meta">
+                            <span class="nf-card-rating">⭐ ${rating}</span>
+                            <span>${year}</span>
+                        </div>
+                        <div class="nf-card-desc">${desc}</div>
+                        <div class="nf-card-actions">
+                            <button class="nf-watch-btn" onclick="window.nfOpenModal(${movie.id})">Watch</button>
+                            <button class="nf-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" 
+                                    onclick="window.nfToggleBookmark(${movie.id}, '${movie.title.replace(/'/g, "\\'")}', '${poster}', ${movie.vote_average}, '${year}')">
+                                ${isBookmarked ? '✓' : '+'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    
+        // Load movies
+        async function loadMovies(endpoint, containerId) {
+            try {
+                const res = await fetch(`${BASE_URL}/movie/${endpoint}?api_key=${API_KEY}&language=${currentLang}`);
+                const data = await res.json();
+                const container = document.getElementById(containerId);
+                container.innerHTML = data.results.slice(0, 15).map(movie => createCard(movie)).join('');
+            } catch (error) {
+                console.error(`Error loading ${endpoint}:`, error);
+                document.getElementById(containerId).innerHTML = 
+                    '<div class="nf-loading">Failed to load movies</div>';
+            }
+        }
+    
+        // Load movies by genre
+        async function loadMoviesByGenre(genreId) {
+            try {
+                const url = genreId 
+                    ? `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=${currentLang}&with_genres=${genreId}&sort_by=popularity.desc`
+                    : `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=${currentLang}`;
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                const container = document.getElementById('nfPopular');
+                container.innerHTML = data.results.slice(0, 15).map(movie => createCard(movie)).join('');
+            } catch (error) {
+                console.error('Error loading movies by genre:', error);
+            }
+        }
+    
+        // Load trending
+        async function loadTrending(timeWindow) {
+            try {
+                const res = await fetch(`${BASE_URL}/trending/movie/${timeWindow}?api_key=${API_KEY}&language=${currentLang}`);
+                const data = await res.json();
+                const container = document.getElementById('nfTrending');
+                container.innerHTML = data.results.slice(0, 15).map(movie => createCard(movie)).join('');
+            } catch (error) {
+                console.error('Error loading trending:', error);
+            }
+        }
+    
+        // Watchlist functions
+        window.nfToggleBookmark = function(id, title, poster, rating, year) {
+            const index = watchlist.findIndex(m => m.id === id);
+            
+            if (index > -1) {
+                watchlist.splice(index, 1);
+            } else {
+                watchlist.push({ id, title, poster, rating, year });
+            }
+            
+            localStorage.setItem('nf-watchlist', JSON.stringify(watchlist));
+            updateWatchlistBadge();
+            
+            // Refresh current view
+            if (currentGenre) {
+                loadMoviesByGenre(currentGenre);
+            } else {
+                loadMovies('popular', 'nfPopular');
+            }
+            loadTrending(currentTrending);
+            loadMovies('top_rated', 'nfTopRated');
+            loadMovies('upcoming', 'nfUpcoming');
+            
+            // Update watchlist section if visible
+            const section = document.getElementById('nfWatchlistSection');
+            if (section.style.display !== 'none') {
+                displayWatchlist();
+            }
+        };
+    
+        function updateWatchlistBadge() {
+            
+        }
+    
+        function toggleWatchlistSection() {
+            const section = document.getElementById('nfWatchlistSection');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                displayWatchlist();
+                section.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                section.style.display = 'none';
+            }
+        }
+    
+        function displayWatchlist() {
+            const container = document.getElementById('nfWatchlist');
+            if (watchlist.length === 0) {
+                container.innerHTML = '<div class="nf-loading">No movies in watchlist yet</div>';
+            } else {
+                container.innerHTML = watchlist.map(movie => `
+                    <div class="nf-card">
+                        <img class="nf-poster" src="${movie.poster}" alt="${movie.title}" loading="lazy" onclick="window.nfOpenModal(${movie.id})">
+                        <div class="nf-card-info">
+                            <div class="nf-card-title">${movie.title}</div>
+                            <div class="nf-card-meta">
+                                <span class="nf-card-rating">⭐ ${movie.rating.toFixed(1)}</span>
+                                <span>${movie.year}</span>
+                            </div>
+                            <div class="nf-card-actions">
+                                <button class="nf-watch-btn" onclick="window.nfOpenModal(${movie.id})">Watch</button>
+                                <button class="nf-bookmark-btn bookmarked" 
+                                        onclick="window.nfToggleBookmark(${movie.id}, '${movie.title.replace(/'/g, "\\'")}', '${movie.poster}', ${movie.rating}, '${movie.year}')">
+                                    ✓
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    
+        // Modal functions
+        window.nfOpenModal = async function(movieId) {
+            openModal(movieId);
+        };
+    
+        async function fetchCsvStreamsByTitle(title, year) {
+            try {
+                const params = new URLSearchParams({ q: title, limit: 5 });
+                const res = await fetch(`${CSV_API_BASE}?${params.toString()}`);
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) return null;
+                // Cari match terbaik berdasar tahun jika ada
+                const yearStr = year ? String(year) : null;
+                const best = data.find(m => (m.tahun && yearStr && m.tahun.includes(yearStr)) || (m.release_date && m.release_date.includes(yearStr))) || data[0];
+                return best;
+            } catch (e) {
+                console.error("Error fetching CSV streams:", e);
+                return null;
+            }
+        }
+
+        function renderStreamButtons(csvMovie) {
+            const section = document.getElementById('nfModalStreamsSection');
+            const container = document.getElementById('nfModalStreams');
+            if (!csvMovie) {
+                section.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+            const servers = [];
+            if (csvMovie.hydrax_servers) servers.push({ name: 'Hydrax', url: csvMovie.hydrax_servers });
+            if (csvMovie.turbovip_servers) servers.push({ name: 'TurboVIP', url: csvMovie.turbovip_servers });
+            if (csvMovie.p2p_servers) servers.push({ name: 'P2P', url: csvMovie.p2p_servers });
+            if (csvMovie.cast_servers) servers.push({ name: 'Cast', url: csvMovie.cast_servers });
+            if (csvMovie.other_servers) servers.push({ name: 'Other', url: csvMovie.other_servers });
+
+            if (servers.length === 0) {
+                section.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = servers.map(s => `
+                <button class="nf-tab-btn" style="margin-bottom:8px;" onclick="window.open('${s.url}','_blank')">
+                    ${s.name}
+                </button>
+            `).join('');
+            section.style.display = 'block';
+        }
+
+        function renderMoviePlayer(csvMovie) {
+            const section = document.getElementById('nfModalPlayerSection');
+            const player = document.getElementById('nfModalPlayer');
+            const placeholder = document.getElementById('nfPlayerPlaceholder');
+            const serversContainer = document.getElementById('nfPlayerServers');
+            
+            if (!csvMovie) {
+                section.style.display = 'none';
+                player.src = '';
+                placeholder.style.display = 'flex';
+                serversContainer.innerHTML = '';
+                return;
+            }
+            
+            const servers = [];
+            if (csvMovie.hydrax_servers) servers.push({ name: 'Hydrax', url: csvMovie.hydrax_servers });
+            if (csvMovie.turbovip_servers) servers.push({ name: 'TurboVIP', url: csvMovie.turbovip_servers });
+            if (csvMovie.p2p_servers) servers.push({ name: 'P2P', url: csvMovie.p2p_servers });
+            if (csvMovie.cast_servers) servers.push({ name: 'Cast', url: csvMovie.cast_servers });
+            if (csvMovie.other_servers) servers.push({ name: 'Other', url: csvMovie.other_servers });
+
+            if (servers.length === 0) {
+                section.style.display = 'none';
+                player.src = '';
+                placeholder.style.display = 'flex';
+                serversContainer.innerHTML = '';
+                return;
+            }
+
+            // Render server buttons
+            serversContainer.innerHTML = servers.map((s, index) => `
+                <button class="nf-player-server-btn ${index === 0 ? 'active' : ''}" 
+                        data-url="${s.url}" 
+                        onclick="window.nfLoadPlayer('${s.url.replace(/'/g, "\\'")}')">
+                    ${s.name}
+                </button>
+            `).join('');
+
+            // Load first server by default
+            if (servers.length > 0) {
+                window.nfLoadPlayer(servers[0].url);
+            }
+
+            section.style.display = 'block';
+        }
+
+        window.nfLoadPlayer = function(url) {
+            const player = document.getElementById('nfModalPlayer');
+            const placeholder = document.getElementById('nfPlayerPlaceholder');
+            const serverButtons = document.querySelectorAll('.nf-player-server-btn');
+            
+            // Update active button
+            serverButtons.forEach(btn => {
+                if (btn.dataset.url === url) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Load player
+            if (url) {
+                player.src = url;
+                player.classList.add('loaded');
+                placeholder.style.display = 'none';
+            } else {
+                player.src = '';
+                player.classList.remove('loaded');
+                placeholder.style.display = 'flex';
+            }
+        };
+
+        async function openModal(movieId) {
+            const modal = document.getElementById('nfModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (popunderTimer) {
+                clearInterval(popunderTimer);
+            }
+            popunderTimer = setInterval(triggerPopunderOnce, AD_CONFIG.popunder.interval);
+    
+            try {
+                // Load movie details
+                const movieRes = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=${currentLang}`);
+                const movie = await movieRes.json();
+                const year = movie.release_date ? movie.release_date.split('-')[0] : null;
+                const csvStreams = await fetchCsvStreamsByTitle(movie.title, year);
+    
+                // Set backdrop
+                document.getElementById('nfModalHero').style.backgroundImage = 
+                    `url('${BACKDROP_URL}${movie.backdrop_path}')`;
+                
+                document.getElementById('nfModalTitle').textContent = movie.title;
+                document.getElementById('nfModalMeta').innerHTML = `
+                    <span class="nf-rating">⭐ ${movie.vote_average.toFixed(1)}</span>
+                    <span>${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</span>
+                    <span>${movie.runtime ? movie.runtime + ' min' : ''}</span>
+                `;
+                document.getElementById('nfModalOverview').textContent = movie.overview || 'No description available.';
+                renderStreamButtons(csvStreams);
+                renderMoviePlayer(csvStreams);
+    
+                // Load trailer
+                const videoRes = await fetch(`${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}&language=en-US`);
+                const videoData = await videoRes.json();
+                const trailer = videoData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+                
+                if (trailer) {
+                    document.getElementById('nfModalTrailerSection').style.display = 'block';
+                    document.getElementById('nfModalTrailer').src = 
+                        `https://www.youtube.com/embed/${trailer.key}`;
+                    
+                    // Load iklan di modal setelah trailer dimuat
+                    if (AD_CONFIG.enabled && AD_CONFIG.placement.inModal) {
+                        const modalAdContainer = document.getElementById('ads-in-modal');
+                        if (modalAdContainer && modalAdContainer.children.length === 0) {
+                            renderNativeBanner(modalAdContainer, AD_CONFIG.nativeBanner, 'container-modal-native-ads');
+                        }
+                    }
+                } else {
+                    document.getElementById('nfModalTrailerSection').style.display = 'none';
+                }
+    
+                // Load cast
+                const creditsRes = await fetch(`${BASE_URL}/movie/${movieId}/credits?api_key=${API_KEY}`);
+                const credits = await creditsRes.json();
+                const castContainer = document.getElementById('nfModalCast');
+                
+                castContainer.innerHTML = credits.cast.slice(0, 6).map(person => {
+                    const photo = person.profile_path ? `${IMG_URL}${person.profile_path}` : 
+                        'https://via.placeholder.com/120x180/1f1f1f/666?text=?';
+                    return `
+                        <div class="nf-cast-item">
+                            <img class="nf-cast-photo" src="${photo}" alt="${person.name}" loading="lazy">
+                            <div class="nf-cast-name">${person.name}</div>
+                            <div class="nf-cast-character">${person.character}</div>
+                        </div>
+                    `;
+                }).join('');
+    
+                // Load similar movies
+                const similarRes = await fetch(`${BASE_URL}/movie/${movieId}/similar?api_key=${API_KEY}&language=${currentLang}`);
+                const similar = await similarRes.json();
+                const similarContainer = document.getElementById('nfModalSimilar');
+                
+                similarContainer.innerHTML = similar.results.slice(0, 6).map(movie => {
+                    const poster = movie.poster_path ? `${IMG_URL}${movie.poster_path}` : 
+                        'https://via.placeholder.com/150x225/1f1f1f/666?text=?';
+                    return `
+                        <div class="nf-similar-item" onclick="window.nfOpenModal(${movie.id})">
+                            <img class="nf-similar-poster" src="${poster}" alt="${movie.title}" loading="lazy">
+                            <div class="nf-similar-title">${movie.title}</div>
+                        </div>
+                    `;
+                }).join('');
+    
+            } catch (error) {
+                console.error('Error loading movie details:', error);
+            }
+        }
+    
+        function closeModal() {
+            const modal = document.getElementById('nfModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            document.getElementById('nfModalTrailer').src = '';
+            document.getElementById('nfModalPlayer').src = '';
+            if (popunderTimer) {
+                clearInterval(popunderTimer);
+                popunderTimer = null;
+            }
+        }
+        
+        // Load semua iklan berdasarkan konfigurasi
+        function loadAllAds() {
+            if (!AD_CONFIG.enabled) return;
+            
+            // ADS POSISI 1: Setelah Hero Banner
+            if (AD_CONFIG.placement.afterHero) {
+                const container1 = document.getElementById('ads-after-hero');
+                if (container1) {
+                    renderBannerAd(container1, AD_CONFIG.bannerLarge);
+                }
+            }
+            
+            // ADS POSISI 2: Setelah Popular Movies
+            if (AD_CONFIG.placement.afterPopular) {
+                const container2 = document.getElementById('ads-after-popular');
+                if (container2) {
+                    renderNativeBanner(container2, AD_CONFIG.nativeBanner);
+                }
+            }
+            
+            // ADS POSISI 3: Setelah Trending
+            if (AD_CONFIG.placement.afterTrending) {
+                const container3 = document.getElementById('ads-after-trending');
+                if (container3) {
+                    renderBannerAd(container3, AD_CONFIG.bannerMedium);
+                }
+            }
+            
+            // ADS POSISI 4: Di Modal (akan dimuat saat modal dibuka)
+            // Ditangani di fungsi openModal()
+        }
+        
+        // Update tombol download dengan smartlink
+        document.querySelectorAll(".cpa").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const smartlinkUrl = getSmartlinkUrl('#');
+                if (AD_CONFIG.smartlink.openInNewTab) {
+                    window.open(smartlinkUrl, "_blank");
+                } else {
+                    window.location.href = smartlinkUrl;
+                }
+            });
+        });
+        
+        // Load iklan saat DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAllAds);
+        } else {
+            loadAllAds();
+        }
+    })();
+    
+    </script>

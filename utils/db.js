@@ -1,67 +1,38 @@
-const { MongoClient } = require('mongodb');
+const postgres = require('postgres');
 
-// MongoDB connection
-let client = null;
-let db = null;
-let collection = null;
+// PostgreSQL connection
+let sql = null;
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/movies';
-const DB_NAME = process.env.DB_NAME || 'movies';
-const COLLECTION_NAME = process.env.COLLECTION_NAME || 'movies';
+const DATABASE_URL = process.env.DATABASE_URL;
 
 /**
- * Connect to MongoDB
+ * Initialize PostgreSQL connection
  */
-async function connectDB() {
-  if (db) {
-    return { db, collection };
+function getDB() {
+  if (sql) {
+    return sql;
   }
 
-  try {
-    if (!client) {
-      client = new MongoClient(MONGODB_URI, {
-        maxPoolSize: 10,
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-      });
-      await client.connect();
-    }
-
-    db = client.db(DB_NAME);
-    collection = db.collection(COLLECTION_NAME);
-
-    return { db, collection };
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw error;
+  if (!DATABASE_URL) {
+    throw new Error('DATABASE_URL must be set in environment variables');
   }
-}
 
-/**
- * Get collection
- */
-async function getCollection() {
-  const { collection: col } = await connectDB();
-  return col;
-}
+  sql = postgres(DATABASE_URL, {
+    max: 10, // Maximum number of connections
+    idle_timeout: 20,
+    connect_timeout: 10,
+    // Optimized for transaction pooler (serverless)
+    prepare: false, // Disable prepared statements for pooler compatibility
+  });
 
-/**
- * Close connection
- */
-async function closeDB() {
-  if (client) {
-    await client.close();
-    client = null;
-    db = null;
-    collection = null;
-  }
+  return sql;
 }
 
 /**
  * Search movies with filters
  */
 async function searchMovies(filters = {}, options = {}) {
-  const col = await getCollection();
+  const db = getDB();
   
   const {
     search,
@@ -74,51 +45,76 @@ async function searchMovies(filters = {}, options = {}) {
     order = 'desc'
   } = options;
 
-  // Build query
-  const query = {};
+  const TABLE_NAME = process.env.TABLE_NAME || 'movies';
 
-  // Filter by judul not null
-  query.judul = { $ne: null };
+  // Build WHERE conditions and params
+  const conditions = [];
+  const params = [];
+
+  // Always filter out null judul
+  conditions.push('judul IS NOT NULL');
 
   // Text search
   if (search) {
-    query.$text = { $search: search };
+    const searchPattern = `%${search}%`;
+    conditions.push('(judul ILIKE $' + (params.length + 1) + ' OR slug ILIKE $' + (params.length + 1) + ' OR sinopsis ILIKE $' + (params.length + 1) + ')');
+    params.push(searchPattern);
   }
 
   // Filter by genre
   if (genre) {
-    query.genre = { $regex: genre, $options: 'i' };
+    const genrePattern = `%${genre}%`;
+    conditions.push('genre ILIKE $' + (params.length + 1));
+    params.push(genrePattern);
   }
 
   // Filter by tahun
   if (tahun) {
-    query.tahun = tahun.toString();
+    conditions.push('tahun = $' + (params.length + 1));
+    params.push(tahun.toString());
   }
 
   // Filter by minimum rating
   if (minRating) {
-    query.rating = { $gte: parseFloat(minRating) };
+    conditions.push('rating >= $' + (params.length + 1));
+    params.push(parseFloat(minRating));
   }
 
-  // Build sort
-  const sort = {};
+  // Build ORDER BY
+  let orderBy = 'created_at DESC';
   if (sortBy === 'rating') {
-    sort.rating = order === 'desc' ? -1 : 1;
+    orderBy = `rating ${order.toUpperCase()} NULLS LAST`;
   } else if (sortBy === 'tahun') {
-    sort.tahun = order === 'desc' ? -1 : 1;
+    orderBy = `tahun ${order.toUpperCase()} NULLS LAST`;
   }
+
+  // Build and execute query
+  const whereClause = conditions.join(' AND ');
+  // Quote 'cast' column because it's a reserved word in PostgreSQL
+  const query = `
+    SELECT slug, judul, url, tahun, genre, rating, quality, durasi, negara, sutradara, "cast", jumlah_cast, sinopsis, poster_url, votes, release_date, hydrax_servers, turbovip_servers, p2p_servers, cast_servers, created_at, updated_at, COUNT(*) OVER() as total_count
+    FROM ${TABLE_NAME}
+    WHERE ${whereClause}
+    ORDER BY ${orderBy}
+    LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+  `;
+  
+  params.push(parseInt(limit));
+  params.push(parseInt(offset));
 
   // Execute query
-  const cursor = col.find(query)
-    .sort(sort)
-    .skip(parseInt(offset))
-    .limit(parseInt(limit));
+  const movies = await db.unsafe(query, params);
+  
+  const total = movies.length > 0 ? parseInt(movies[0].total_count) : 0;
 
-  const movies = await cursor.toArray();
-  const total = await col.countDocuments(query);
+  // Remove total_count from results and rename cast back
+  const cleanMovies = movies.map(movie => {
+    const { total_count, ...rest } = movie;
+    return rest;
+  });
 
   return {
-    movies,
+    movies: cleanMovies,
     total,
     limit: parseInt(limit),
     offset: parseInt(offset)
@@ -129,45 +125,111 @@ async function searchMovies(filters = {}, options = {}) {
  * Get movie by slug
  */
 async function getMovieBySlug(slug) {
-  const col = await getCollection();
-  const movie = await col.findOne({ slug });
-  return movie;
+  const db = getDB();
+  const TABLE_NAME = process.env.TABLE_NAME || 'movies';
+
+  // Quote 'cast' column because it's a reserved word
+  const movies = await db.unsafe(`
+    SELECT slug, judul, url, tahun, genre, rating, quality, durasi, negara, sutradara, "cast", jumlah_cast, sinopsis, poster_url, votes, release_date, hydrax_servers, turbovip_servers, p2p_servers, cast_servers, created_at, updated_at
+    FROM ${TABLE_NAME}
+    WHERE slug = $1
+    LIMIT 1
+  `, [slug]);
+
+  return movies[0] || null;
 }
 
 /**
  * Get movie by TMDB ID
  */
 async function getMovieByTMDBId(tmdbId) {
-  const col = await getCollection();
-  const movie = await col.findOne({ tmdb_id: tmdbId });
-  return movie;
+  const db = getDB();
+  const TABLE_NAME = process.env.TABLE_NAME || 'movies';
+
+  const movies = await db`
+    SELECT * FROM ${db(TABLE_NAME)}
+    WHERE tmdb_id = ${tmdbId}
+    LIMIT 1
+  `;
+
+  return movies[0] || null;
 }
 
 /**
  * Update movie with TMDB data
  */
 async function updateMovieWithTMDB(slug, tmdbData) {
-  const col = await getCollection();
-  const result = await col.updateOne(
-    { slug },
-    {
-      $set: {
-        ...tmdbData,
-        updatedAt: new Date()
-      }
-    },
-    { upsert: false }
-  );
-  return result;
+  const db = getDB();
+  const TABLE_NAME = process.env.TABLE_NAME || 'movies';
+
+  // Build update object
+  const updateData = {
+    ...tmdbData,
+    updated_at: new Date()
+  };
+
+  const updated = await db`
+    UPDATE ${db(TABLE_NAME)}
+    SET ${db(updateData)}
+    WHERE slug = ${slug}
+    RETURNING *
+  `;
+
+  return updated[0] || null;
+}
+
+/**
+ * Insert movie
+ */
+async function insertMovie(movie) {
+  const db = getDB();
+  const TABLE_NAME = process.env.TABLE_NAME || 'movies';
+
+  const inserted = await db`
+    INSERT INTO ${db(TABLE_NAME)} ${db(movie)}
+    RETURNING *
+  `;
+
+  return inserted[0] || null;
+}
+
+/**
+ * Upsert movie (insert or update)
+ */
+async function upsertMovie(movie) {
+  const db = getDB();
+  const TABLE_NAME = process.env.TABLE_NAME || 'movies';
+
+  const upserted = await db`
+    INSERT INTO ${db(TABLE_NAME)} ${db(movie)}
+    ON CONFLICT (slug) DO UPDATE SET
+      ${db({
+        ...movie,
+        updated_at: new Date()
+      })}
+    RETURNING *
+  `;
+
+  return upserted[0] || null;
+}
+
+/**
+ * Close database connection
+ */
+async function closeDB() {
+  if (sql) {
+    await sql.end();
+    sql = null;
+  }
 }
 
 module.exports = {
-  connectDB,
-  getCollection,
-  closeDB,
+  getDB,
   searchMovies,
   getMovieBySlug,
   getMovieByTMDBId,
-  updateMovieWithTMDB
+  updateMovieWithTMDB,
+  insertMovie,
+  upsertMovie,
+  closeDB
 };
-

@@ -1,17 +1,25 @@
 {
   "name": "movie-api",
   "version": "1.0.0",
-  "description": "API untuk data movie menggunakan Vercel dengan integrasi TMDB",
+  "description": "API untuk data movie menggunakan Vercel dengan integrasi TMDB dan Supabase",
   "main": "api/index.js",
   "scripts": {
     "dev": "vercel dev",
-    "start": "node api/index.js"
+    "start": "node api/index.js",
+    "setup-table": "node scripts/setup-table.js",
+    "migrate": "node scripts/migrate-csv-to-supabase.js",
+    "migrate-json": "node scripts/migrate-to-supabase.js"
   },
-  "keywords": ["api", "movie", "vercel", "tmdb"],
+  "keywords": ["api", "movie", "vercel", "tmdb", "supabase", "postgresql"],
   "author": "",
   "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "postgres": "^3.4.3",
+    "csv-parser": "^3.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  },
   "engines": {
     "node": "24.x"
   }

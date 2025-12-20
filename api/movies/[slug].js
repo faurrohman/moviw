@@ -1,4 +1,4 @@
-const { getMoviesData } = require('../../utils/data-loader');
+const { getMovieBySlug } = require('../../utils/db');
 const { enrichMovieWithTMDB } = require('../../utils/tmdb');
 
 module.exports = async (req, res) => {
@@ -9,19 +9,6 @@ module.exports = async (req, res) => {
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
-  }
-
-  // Load movies data with error handling
-  let moviesData;
-  try {
-    moviesData = getMoviesData();
-  } catch (error) {
-    console.error('Error loading movies data:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to load movies data',
-      error: error.message
-    });
   }
 
   // Get slug from query parameter (Vercel passes dynamic route params in query)
@@ -35,29 +22,39 @@ module.exports = async (req, res) => {
     });
   }
 
-  const movie = moviesData.find(m => m.slug === slug);
+  try {
+    // Get movie from MongoDB
+    const movie = await getMovieBySlug(slug);
 
-  if (!movie) {
-    return res.status(404).json({
+    if (!movie) {
+      return res.status(404).json({
+        success: false,
+        message: 'Movie not found'
+      });
+    }
+
+    // Enrich with TMDB if requested
+    let enrichedMovie = movie;
+    if (tmdb === 'true' || tmdb === '1') {
+      try {
+        enrichedMovie = await enrichMovieWithTMDB(movie);
+      } catch (error) {
+        console.error('Error enriching movie:', error);
+        // Return original movie if enrichment fails
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: enrichedMovie
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Movie not found'
+      message: 'Database query failed',
+      error: error.message
     });
   }
-
-  // Enrich with TMDB if requested
-  let enrichedMovie = movie;
-  if (tmdb === 'true' || tmdb === '1') {
-    try {
-      enrichedMovie = await enrichMovieWithTMDB(movie);
-    } catch (error) {
-      console.error('Error enriching movie:', error);
-      // Return original movie if enrichment fails
-    }
-  }
-
-  return res.status(200).json({
-    success: true,
-    data: enrichedMovie
-  });
 };
 
